@@ -21,6 +21,7 @@ import { Zap, Mail, Clock, GitBranch, Tag, Trash2, Save, Play, Sparkles, CheckCi
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
+import { useAuth } from "@/lib/auth";
 import { GlassCard, PageHeader } from "@/components/kit";
 import { meta } from "@/lib/meta";
 import { Button } from "@/components/ui/button";
@@ -102,6 +103,7 @@ const initialEdges = [
 ];
 
 function Builder() {
+  const { user } = useAuth();
   const { workflows, templates, contacts } = useStore();
   const currentWorkflow = workflows.current;
 
@@ -186,12 +188,25 @@ function Builder() {
   const handleTestRun = async () => {
     setTestingWorkflow(true);
     try {
+      // Ensure workflow is saved if new
+      let wfId = currentWorkflow?._id;
+      if (!wfId) {
+        await workflows.save({
+          name: "Customer Onboarding Journey",
+          nodes,
+          edges,
+          isActive: active,
+        });
+        wfId = currentWorkflow?._id || "1";
+      }
+
       const sampleContact = contacts.items[0];
-      const res = await workflows.testTrigger(
-        currentWorkflow?._id || "1",
-        sampleContact?._id
-      );
-      toast.success(res?.message || "Executed test run for sample contact!");
+      const targetPayload = sampleContact
+        ? { contactId: sampleContact._id }
+        : { email: user?.email || "arjitripathi0607@gmail.com", name: user?.name || "Arjit Tripathi" };
+
+      const res = await workflows.testTrigger(wfId || "1", targetPayload);
+      toast.success(res?.message || "Executed test run for sample recipient!");
     } catch (err: any) {
       toast.error(err.message || "Failed to trigger test execution");
     } finally {

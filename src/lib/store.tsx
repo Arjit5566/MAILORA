@@ -376,10 +376,11 @@ function useStoreValue() {
         method: "POST",
       });
     },
-    testTrigger: async (id: string, contactId?: string) => {
-      return request<{ message: string; contactId: string }>(`${endpoints.workflows}/${id}/trigger`, {
+    testTrigger: async (id: string, payload?: string | { contactId?: string; email?: string; name?: string }) => {
+      const body = typeof payload === "string" ? { contactId: payload } : (payload || {});
+      return request<{ message: string; success?: boolean; previewUrl?: string }>(`${endpoints.workflows}/${id}/trigger`, {
         method: "POST",
-        body: JSON.stringify({ contactId }),
+        body: JSON.stringify(body),
       });
     },
   };
