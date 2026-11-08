@@ -107,6 +107,21 @@ export function Templates() {
   const [targetTemplate, setTargetTemplate] = useState<Template | null>(null);
   const [testEmail, setTestEmail] = useState("");
   const [sendingTest, setSendingTest] = useState(false);
+  const [loadingStarter, setLoadingStarter] = useState(false);
+
+  const handleLoadStarterTemplates = async () => {
+    setLoadingStarter(true);
+    try {
+      const res = await (templates as any).seedStarter();
+      toast.success(res?.message || "Starter templates loaded!", {
+        description: "High-converting responsive templates are now ready in your library.",
+      });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to load starter templates");
+    } finally {
+      setLoadingStarter(false);
+    }
+  };
 
   // Categories list with item counts
   const categoryCounts = useMemo(() => {
@@ -283,6 +298,15 @@ export function Templates() {
         actions={
           <div className="flex items-center gap-2">
             <Button
+              variant="outline"
+              onClick={handleLoadStarterTemplates}
+              disabled={loadingStarter}
+              className="rounded-2xl border-border/80 bg-card/80 hover:bg-accent/80 text-xs gap-1.5 shadow-xs"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              {loadingStarter ? "Loading..." : "Load Starter Pack"}
+            </Button>
+            <Button
               onClick={() => start()}
               className="bg-gradient-brand shadow-glow hover:opacity-95 text-white"
             >
@@ -436,21 +460,39 @@ export function Templates() {
           <div className="mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-muted/60 text-muted-foreground">
             <Search className="h-6 w-6" />
           </div>
-          <h3 className="font-semibold text-foreground">No templates match your search</h3>
+          <h3 className="font-semibold text-foreground">
+            {templates.items.length === 0 ? "Your template library is empty" : "No templates match your search"}
+          </h3>
           <p className="mt-1 text-xs text-muted-foreground max-w-sm">
-            Try adjusting your category filter or search keywords, or create a brand new template.
+            {templates.items.length === 0
+              ? "Load our curated starter template pack featuring onboarding, newsletters, product launches, and sales outreach."
+              : "Try adjusting your category filter or search keywords, or create a brand new template."}
           </p>
-          <Button
-            size="sm"
-            onClick={() => {
-              setSearchQuery("");
-              setSelectedCat("All");
-            }}
-            variant="outline"
-            className="mt-4 rounded-xl"
-          >
-            Clear Filters
-          </Button>
+          <div className="mt-4 flex items-center gap-2">
+            {templates.items.length === 0 ? (
+              <Button
+                size="sm"
+                onClick={handleLoadStarterTemplates}
+                disabled={loadingStarter}
+                className="rounded-xl bg-gradient-brand shadow-glow text-white"
+              >
+                <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                {loadingStarter ? "Loading Templates..." : "Load Starter Template Pack"}
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCat("All");
+                }}
+                variant="outline"
+                className="rounded-xl"
+              >
+                Clear Filters
+              </Button>
+            )}
+          </div>
         </div>
       )}
 

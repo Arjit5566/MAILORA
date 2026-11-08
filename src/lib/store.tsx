@@ -280,6 +280,24 @@ function useStoreValue() {
         body: JSON.stringify({ testEmail }),
       });
     },
+    seedStarter: async () => {
+      try {
+        const res = await request<{ message: string; templates?: Template[] }>(`${endpoints.templates}/seed`, {
+          method: "POST",
+        });
+        if (res?.templates && Array.isArray(res.templates)) {
+          setTemplates(res.templates);
+        } else {
+          const fresh = await request<Template[]>(endpoints.templates);
+          setTemplates(fresh);
+        }
+        return res;
+      } catch {
+        const fresh = await request<Template[]>(endpoints.templates);
+        setTemplates(fresh);
+        return { message: "Templates refreshed" };
+      }
+    },
   };
 
   // Schedule methods

@@ -6,6 +6,7 @@ import { EmailLog } from "../models/EmailLog.js";
 import { memoryDb } from "../utils/memoryStore.js";
 import { sendEmail, compileTemplate } from "../services/emailService.js";
 import { getAuthUserId, mapWithUnderscoreId, formatWithUnderscoreId } from "../utils/authHelper.js";
+import { STARTER_TEMPLATES } from "../utils/starterTemplates.js";
 
 const router = Router();
 
@@ -15,20 +16,97 @@ router.get("/", async (req: Request, res: Response) => {
     const userId = await getAuthUserId(req);
 
     if (isPrismaConnected) {
-      const list = await prisma.template.findMany({
+      let list = await prisma.template.findMany({
         where: { userId },
         orderBy: { createdAt: "desc" },
       });
+
+      // Auto-seed starter templates if user has none
+      if (list.length === 0) {
+        try {
+          await prisma.template.createMany({
+            data: STARTER_TEMPLATES.map((t) => ({
+              userId,
+              name: t.name,
+              category: t.category,
+              subject: t.subject,
+              html: t.html,
+            })),
+          });
+          list = await prisma.template.findMany({
+            where: { userId },
+            orderBy: { createdAt: "desc" },
+          });
+        } catch (e: any) {
+          console.warn("[Templates] Auto-seed error:", e.message);
+        }
+      }
+
       return res.json(mapWithUnderscoreId(list));
     }
 
     if (isMongoConnected) {
-      const templates = await Template.find().sort({ createdAt: -1 });
+      let templates = await Template.find().sort({ createdAt: -1 });
+      if (templates.length === 0) {
+        await Template.insertMany(STARTER_TEMPLATES);
+        templates = await Template.find().sort({ createdAt: -1 });
+      }
       return res.json(templates);
     }
 
-    const templates = await memoryDb.templates.find();
+    let templates = await memoryDb.templates.find();
+    if (templates.length === 0) {
+      for (const t of STARTER_TEMPLATES) {
+        await memoryDb.templates.create(t);
+      }
+      templates = await memoryDb.templates.find();
+    }
     res.json(templates);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST seed or restore starter templates
+router.post("/seed", async (req: Request, res: Response) => {
+  try {
+    const userId = await getAuthUserId(req);
+
+    if (isPrismaConnected) {
+      // Find existing template names to avoid exact duplicates
+      const existing = await prisma.template.findMany({
+        where: { userId },
+        select: { name: true },
+      });
+      const existingNames = new Set(existing.map((x) => x.name.toLowerCase()));
+
+      const toAdd = STARTER_TEMPLATES.filter(
+        (t) => !existingNames.has(t.name.toLowerCase())
+      );
+
+      if (toAdd.length > 0) {
+        await prisma.template.createMany({
+          data: toAdd.map((t) => ({
+            userId,
+            name: t.name,
+            category: t.category,
+            subject: t.subject,
+            html: t.html,
+          })),
+        });
+      }
+
+      const all = await prisma.template.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+      });
+      return res.json({
+        message: `Added ${toAdd.length} starter templates`,
+        templates: mapWithUnderscoreId(all),
+      });
+    }
+
+    res.json({ message: "Seeded starter templates", count: STARTER_TEMPLATES.length });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
