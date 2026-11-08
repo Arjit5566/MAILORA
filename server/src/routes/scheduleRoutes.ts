@@ -60,20 +60,45 @@ router.post("/", async (req: Request, res: Response) => {
     // Parse target date and validate against past scheduling
     const [y, m, d] = String(date).split("-").map(Number);
     const timeParts = String(time).trim().split(":");
-    const hours = parseInt(timeParts[0] || "0", 10);
-    const minutes = parseInt(timeParts[1] || "0", 10);
-    const targetDateObj = new Date(y || new Date().getFullYear(), (m || 1) - 1, d || 1, hours, minutes, 0, 0);
+    let hours = parseInt(timeParts[0] || "0", 10);
+    let minutes = parseInt(timeParts[1] || "0", 10);
+    let targetDateObj = new Date(y || new Date().getFullYear(), (m || 1) - 1, d || 1, hours, minutes, 0, 0);
 
     if (isNaN(targetDateObj.getTime())) {
       return res.status(400).json({ error: "Invalid date or time format" });
     }
 
     const now = new Date();
-    // Allow generous 5-minute grace window so slight clock drift or seconds elapsed don't trigger past date error
-    const diffMs = targetDateObj.getTime() - now.getTime();
-    if (diffMs < -300000) {
-      return res.status(400).json({ error: "Cannot schedule an email in the past. Please select a future time." });
+    const todayY = now.getFullYear();
+    const todayM = now.getMonth() + 1;
+    const todayD = now.getDate();
+    const isToday = (y === todayY && m === todayM && d === todayD);
+
+    if (isToday) {
+      // 1. If 12-hour format was typed (e.g., 5:00 or 6:00 AM) and is in the past, convert to PM (17:00 or 18:00)
+      if (hours < 12 && targetDateObj.getTime() < now.getTime()) {
+        const pmCandidate = new Date(y, m - 1, d, hours + 12, minutes, 0, 0);
+        if (pmCandidate.getTime() > now.getTime()) {
+          hours += 12;
+          targetDateObj = pmCandidate;
+        }
+      }
+
+      // 2. If time is still in the past or right now, schedule to dispatch in 1 minute today instead of rejecting
+      if (targetDateObj.getTime() <= now.getTime()) {
+        targetDateObj = new Date(now.getTime() + 60 * 1000);
+        hours = targetDateObj.getHours();
+        minutes = targetDateObj.getMinutes();
+      }
+    } else {
+      // For earlier calendar dates, check if strictly before today
+      const targetEndOfDay = new Date(y, m - 1, d, 23, 59, 59, 999);
+      if (targetEndOfDay.getTime() < now.getTime()) {
+        return res.status(400).json({ error: "Cannot schedule an email for a past date. Please pick today or a future date." });
+      }
     }
+
+    const normalizedTime = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 
     // Resolve explicit recipient targets
     const resolvedRecipients: Array<{ email: string; name?: string; company?: string }> = [];
@@ -205,15 +230,31 @@ router.put("/:id", async (req: Request, res: Response) => {
     const { title, subject, html, date, time, timezone, recipients, audience } = req.body;
 
     let targetDateObj: Date | undefined;
+    let normalizedTime: string | undefined;
     if (date && time) {
       const [y, m, d] = String(date).split("-").map(Number);
       const timeParts = String(time).trim().split(":");
-      const hours = parseInt(timeParts[0] || "0", 10);
-      const minutes = parseInt(timeParts[1] || "0", 10);
+      let hours = parseInt(timeParts[0] || "0", 10);
+      let minutes = parseInt(timeParts[1] || "0", 10);
       targetDateObj = new Date(y || new Date().getFullYear(), (m || 1) - 1, d || 1, hours, minutes, 0, 0);
-      if (targetDateObj.getTime() < Date.now() - 300000) {
-        return res.status(400).json({ error: "Cannot reschedule an email to a past time." });
+
+      const now = new Date();
+      const isToday = (y === now.getFullYear() && m === now.getMonth() + 1 && d === now.getDate());
+      if (isToday) {
+        if (hours < 12 && targetDateObj.getTime() < now.getTime()) {
+          const pmCandidate = new Date(y, m - 1, d, hours + 12, minutes, 0, 0);
+          if (pmCandidate.getTime() > now.getTime()) {
+            hours += 12;
+            targetDateObj = pmCandidate;
+          }
+        }
+        if (targetDateObj.getTime() <= now.getTime()) {
+          targetDateObj = new Date(now.getTime() + 60 * 1000);
+          hours = targetDateObj.getHours();
+          minutes = targetDateObj.getMinutes();
+        }
       }
+      normalizedTime = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
     }
 
     const patch: any = {};

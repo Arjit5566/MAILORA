@@ -231,17 +231,46 @@ export function SchedulingPage() {
       return;
     }
 
-    const scheduledDateObj = parseScheduleDateTime(date, time);
+    let scheduledDateObj = parseScheduleDateTime(date, time);
     if (isNaN(scheduledDateObj.getTime())) {
       toast.error("Invalid date or time");
       return;
     }
 
-    // Allow 5 minutes grace window so minor clock drifts or a few seconds elapsed don't block the user
-    const diffMs = scheduledDateObj.getTime() - Date.now();
-    if (diffMs < -300000) {
-      toast.error("Cannot schedule an email in the past. Please pick a time in the future.");
-      return;
+    const now = new Date();
+    const isToday = (date === today);
+
+    if (isToday) {
+      // 1. If 12-hour format was typed (e.g. 5:00 or 6:00 AM) and is in the past, convert to PM (17:00 / 18:00)
+      const parts = time.trim().split(":");
+      const hours = parseInt(parts[0] || "0", 10);
+      const minutes = parseInt(parts[1] || "0", 10);
+
+      if (hours < 12 && scheduledDateObj.getTime() < now.getTime()) {
+        const pmTimeStr = `${String(hours + 12).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+        const pmDate = parseScheduleDateTime(date, pmTimeStr);
+        if (pmDate.getTime() > now.getTime()) {
+          setTime(pmTimeStr);
+          scheduledDateObj = pmDate;
+          toast.info(`Adjusted to ${pmTimeStr} (${hours}:00 PM) for today`);
+        }
+      }
+
+      // 2. If it's still in the past or right now, auto-adjust to 2 minutes from now today
+      if (scheduledDateObj.getTime() <= now.getTime()) {
+        const nextTime = getSmartFutureTime(2);
+        setTime(nextTime);
+        scheduledDateObj = parseScheduleDateTime(date, nextTime);
+        toast.info(`Adjusted to dispatch in 2 minutes today (${nextTime})`);
+      }
+    } else {
+      // For earlier calendar dates: check if strictly in the past
+      const endOfTargetDay = new Date(scheduledDateObj);
+      endOfTargetDay.setHours(23, 59, 59, 999);
+      if (endOfTargetDay.getTime() < now.getTime()) {
+        toast.error("Cannot schedule an email for a past date. Please pick today or a future date.");
+        return;
+      }
     }
 
     if (recipientMode === "contacts" && selectedContactIds.length === 0) {
@@ -798,6 +827,79 @@ export function SchedulingPage() {
               </div>
             </div>
 
+            {/* Quick Dispatch Presets for Today */}
+            <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-xl bg-primary/5 border border-primary/20 text-xs">
+              <span className="text-[11px] font-semibold text-primary flex items-center gap-1 mr-1">
+                <Sparkles className="h-3 w-3" /> Quick Today:
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setDate(today);
+                  setTime(getSmartFutureTime(2));
+                  toast.success("Set to send in 2 minutes today");
+                }}
+                className="px-2 py-0.5 rounded border bg-background hover:bg-accent text-[11px] font-medium transition-colors"
+              >
+                ⚡ In 2 mins
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDate(today);
+                  setTime(getSmartFutureTime(15));
+                  toast.success("Set to send in 15 minutes today");
+                }}
+                className="px-2 py-0.5 rounded border bg-background hover:bg-accent text-[11px] font-medium transition-colors"
+              >
+                ⏱️ In 15 mins
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDate(today);
+                  setTime("17:00");
+                  toast.success("Set to send today at 5:00 PM (17:00)");
+                }}
+                className="px-2 py-0.5 rounded border bg-background hover:bg-accent text-[11px] font-medium transition-colors"
+              >
+                🕔 5:00 PM
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDate(today);
+                  setTime("18:00");
+                  toast.success("Set to send today at 6:00 PM (18:00)");
+                }}
+                className="px-2 py-0.5 rounded border bg-background hover:bg-accent text-[11px] font-medium transition-colors"
+              >
+                🕕 6:00 PM
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDate(today);
+                  setTime("19:00");
+                  toast.success("Set to send today at 7:00 PM (19:00)");
+                }}
+                className="px-2 py-0.5 rounded border bg-background hover:bg-accent text-[11px] font-medium transition-colors"
+              >
+                🕖 7:00 PM
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDate(today);
+                  setTime("20:00");
+                  toast.success("Set to send today at 8:00 PM (20:00)");
+                }}
+                className="px-2 py-0.5 rounded border bg-background hover:bg-accent text-[11px] font-medium transition-colors"
+              >
+                🕗 8:00 PM
+              </button>
+            </div>
+
             {/* 2. Subject Line */}
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold">Subject Line</Label>
@@ -856,6 +958,79 @@ export function SchedulingPage() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            {/* Quick Dispatch Presets for Today */}
+            <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-xl bg-primary/5 border border-primary/20 text-xs">
+              <span className="text-[11px] font-semibold text-primary flex items-center gap-1 mr-1">
+                <Sparkles className="h-3 w-3" /> Quick Today:
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setDate(today);
+                  setTime(getSmartFutureTime(2));
+                  toast.success("Set to send in 2 minutes today");
+                }}
+                className="px-2 py-0.5 rounded border bg-background hover:bg-accent text-[11px] font-medium transition-colors"
+              >
+                ⚡ In 2 mins
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDate(today);
+                  setTime(getSmartFutureTime(15));
+                  toast.success("Set to send in 15 minutes today");
+                }}
+                className="px-2 py-0.5 rounded border bg-background hover:bg-accent text-[11px] font-medium transition-colors"
+              >
+                ⏱️ In 15 mins
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDate(today);
+                  setTime("17:00");
+                  toast.success("Set to send today at 5:00 PM (17:00)");
+                }}
+                className="px-2 py-0.5 rounded border bg-background hover:bg-accent text-[11px] font-medium transition-colors"
+              >
+                🕔 5:00 PM
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDate(today);
+                  setTime("18:00");
+                  toast.success("Set to send today at 6:00 PM (18:00)");
+                }}
+                className="px-2 py-0.5 rounded border bg-background hover:bg-accent text-[11px] font-medium transition-colors"
+              >
+                🕕 6:00 PM
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDate(today);
+                  setTime("19:00");
+                  toast.success("Set to send today at 7:00 PM (19:00)");
+                }}
+                className="px-2 py-0.5 rounded border bg-background hover:bg-accent text-[11px] font-medium transition-colors"
+              >
+                🕖 7:00 PM
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDate(today);
+                  setTime("20:00");
+                  toast.success("Set to send today at 8:00 PM (20:00)");
+                }}
+                className="px-2 py-0.5 rounded border bg-background hover:bg-accent text-[11px] font-medium transition-colors"
+              >
+                🕗 8:00 PM
+              </button>
             </div>
 
             {/* 4. Recipient Selection */}
