@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String         @id @default(uuid())
+  email                String         @unique
+  name                 String
+  password             String
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  campaigns            Campaign[]
+  contacts             Contact[]
+  templates            Template[]
+  scheduledJobs        ScheduledJob[]
+  workflows            Workflow[]
+  emailLogs            EmailLog[]
+  settings             Setting[]
+  aiEmails             AiEmail[]
+}
+
+model Campaign {
+  id          String     @id @default(uuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  subject     String
+  html        String
+  status      String     @default("draft")
+  audience    String     @default("All contacts")
+  recipients  String?
+  fromName    String?
+  fromEmail   String?
+  sent        Int        @default(0)
+  opens       Int        @default(0)
+  clicks      Int        @default(0)
+  date        String     @default("Today")
+  scheduledAt DateTime?
+  timezone    String     @default("UTC")
+  templateId  String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  emailLogs   EmailLog[]
+}
+
+model Contact {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  company   String?
+  tags      String[] @default([])
+  status    String   @default("active")
+  addedAt   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, email])
+}
+
+model Template {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  category  String   @default("Newsletter")
+  subject   String
+  html      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ScheduledJob {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  date        String
+  time        String
+  timezone    String    @default("UTC")
+  audience    String    @default("All contacts")
+  recipients  String?
+  status      String    @default("scheduled")
+  subject     String
+  html        String
+  scheduledAt DateTime?
+  executedAt  DateTime?
+  error       String?
+  sentCount   Int       @default(0)
+  failedCount Int       @default(0)
+  campaignId  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Workflow {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  description     String?
+  isActive        Boolean  @default(true)
+  nodes           Json     @default("[]")
+  edges           Json     @default("[]")
+  trigger         String   @default("new_contact")
+  executionsCount Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model EmailLog {
+  id             String    @id @default(uuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipientEmail String
+  recipientName  String?
+  cc             String?
+  bcc            String?
+  subject        String
+  campaignId     String?
+  campaign       Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  workflowId     String?
+  contactId      String?
+  status         String    @default("queued")
+  openedAt       DateTime?
+  clicks         Json      @default("[]")
+  error          String?
+  messageId      String?
+  userAgent      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Setting {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider    String   @default("ethereal")
+  brevoApiKey String?
+  smtpHost    String?
+  smtpPort    Int?     @default(587)
+  smtpUser    String?
+  smtpPass    String?
+  smtpSecure  Boolean  @default(false)
+  fromEmail   String   @default("notifications@sendflow.app")
+  fromName    String   @default("SendFlow Studio")
+  apiBaseUrl  String   @default("http://localhost:4000")
+  appUrl      String   @default("http://localhost:5173")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AiEmail {
+  id             String    @id @default(uuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipientEmail String
+  recipientName  String?
+  cc             String?
+  bcc            String?
+  emailType      String
+  tone           String
+  description    String
+  subject        String
+  htmlContent    String
+  preheader      String?
+  status         String    @default("draft")
+  scheduledAt    DateTime?
+  sentAt         DateTime?
+  error          String?
+  messageId      String?
+  previewUrl     String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+
