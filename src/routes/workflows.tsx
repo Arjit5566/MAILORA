@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useRef, useState, useEffect, type DragEvent } from "react";
+import { useCallback, useRef, useState, useEffect, type DragEvent, Component, type ReactNode } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -17,7 +17,7 @@ import {
   type NodeProps,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Zap, Mail, Clock, GitBranch, Tag, Trash2, Save, Play, Sparkles, CheckCircle2 } from "lucide-react";
+import { Zap, Mail, Clock, GitBranch, Tag, Trash2, Save, Play, Sparkles, CheckCircle2, RotateCcw, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
@@ -32,11 +32,53 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export const Route = createFileRoute("/workflows")({
   head: () => meta("Automations", "Drag-and-drop workflow builder for email automations."),
   component: () => (
-    <ReactFlowProvider>
-      <Builder />
-    </ReactFlowProvider>
+    <WorkflowErrorBoundary>
+      <ReactFlowProvider>
+        <Builder />
+      </ReactFlowProvider>
+    </WorkflowErrorBoundary>
   ),
 });
+
+class WorkflowErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  override render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-8 flex flex-col items-center justify-center min-h-[400px] text-center">
+          <div className="p-3 rounded-2xl bg-destructive/10 text-destructive mb-3">
+            <AlertTriangle className="h-8 w-8" />
+          </div>
+          <h2 className="text-lg font-bold text-foreground">Workflow Canvas Error</h2>
+          <p className="text-xs text-muted-foreground mt-1 max-w-md">
+            The workflow canvas encountered an issue rendering saved steps. You can restore default steps or reload the page.
+          </p>
+          <div className="flex gap-2 mt-4">
+            <Button
+              size="sm"
+              onClick={() => {
+                this.setState({ hasError: false, error: null });
+                window.location.reload();
+              }}
+              className="text-xs"
+            >
+              <RotateCcw className="h-3.5 w-3.5 mr-1" /> Reload Canvas
+            </Button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const kinds = {
   trigger: { label: "Trigger", icon: Zap, hint: "Contact signs up" },
@@ -50,7 +92,7 @@ type Kind = keyof typeof kinds;
 type FlowData = { kind: Kind; text: string; templateId?: string };
 
 function FlowNode({ data, selected }: NodeProps<Node<FlowData>>) {
-  const k = kinds[data.kind] || kinds.trigger;
+  const k = (data && data.kind && kinds[data.kind]) ? kinds[data.kind] : kinds.trigger;
   const Icon = k.icon;
   return (
     <div
@@ -58,7 +100,7 @@ function FlowNode({ data, selected }: NodeProps<Node<FlowData>>) {
         selected ? "shadow-glow ring-2 ring-primary bg-accent/30" : "hover:border-primary/50"
       }`}
     >
-      {data.kind !== "trigger" && (
+      {data?.kind !== "trigger" && (
         <Handle type="target" position={Position.Top} className="!bg-primary !h-2.5 !w-2.5" />
       )}
       <div className="flex items-center gap-2.5">
@@ -67,7 +109,7 @@ function FlowNode({ data, selected }: NodeProps<Node<FlowData>>) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-xs font-bold text-foreground tracking-wide uppercase">{k.label}</div>
-          <div className="text-[11px] text-muted-foreground truncate font-medium">{data.text}</div>
+          <div className="text-[11px] text-muted-foreground truncate font-medium">{data?.text || k.hint}</div>
         </div>
       </div>
       <Handle type="source" position={Position.Bottom} className="!bg-primary-glow !h-2.5 !w-2.5" />
@@ -94,7 +136,7 @@ const edge = (s: string, t: string): Edge => ({
   style: { stroke: "var(--primary)", strokeWidth: 2 },
 });
 
-const initialEdges = [
+const initialEdges: Edge[] = [
   edge("1", "2"),
   edge("2", "3"),
   edge("3", "4"),
@@ -102,16 +144,72 @@ const initialEdges = [
   edge("4", "6"),
 ];
 
+function normalizeNodes(raw: any): Node<FlowData>[] {
+  if (!raw) return initialNodes;
+  let arr = raw;
+  if (typeof arr === "string") {
+    try {
+      arr = JSON.parse(arr);
+    } catch {
+      return initialNodes;
+    }
+  }
+  if (!Array.isArray(arr) || arr.length === 0) return initialNodes;
+
+  return arr.map((n: any, idx: number) => {
+    const rawKind = n?.data?.kind;
+    const kind: Kind = (rawKind && kinds[rawKind as Kind]) ? (rawKind as Kind) : "trigger";
+    const text = n?.data?.text || kinds[kind].hint;
+    const posX = typeof n?.position?.x === "number" && !isNaN(n.position.x) ? n.position.x : 200;
+    const posY = typeof n?.position?.y === "number" && !isNaN(n.position.y) ? n.position.y : 20 + idx * 110;
+
+    return {
+      id: String(n?.id ?? idx + 1),
+      type: "flow",
+      position: { x: posX, y: posY },
+      data: {
+        kind,
+        text,
+        templateId: n?.data?.templateId,
+      },
+      selected: !!n?.selected,
+    };
+  });
+}
+
+function normalizeEdges(raw: any): Edge[] {
+  if (!raw) return initialEdges;
+  let arr = raw;
+  if (typeof arr === "string") {
+    try {
+      arr = JSON.parse(arr);
+    } catch {
+      return initialEdges;
+    }
+  }
+  if (!Array.isArray(arr) || arr.length === 0) return initialEdges;
+
+  return arr
+    .filter((e: any) => e && e.source && e.target)
+    .map((e: any, idx: number) => ({
+      id: String(e.id || `${e.source}-${e.target}-${idx}`),
+      source: String(e.source),
+      target: String(e.target),
+      animated: e.animated !== undefined ? !!e.animated : true,
+      style: e.style || { stroke: "var(--primary)", strokeWidth: 2 },
+    }));
+}
+
 function Builder() {
   const { user } = useAuth();
   const { workflows, templates, contacts } = useStore();
   const currentWorkflow = workflows.current;
 
   const [nodes, setNodes, onNodesChange] = useNodesState(
-    currentWorkflow?.nodes?.length ? currentWorkflow.nodes : initialNodes
+    normalizeNodes(currentWorkflow?.nodes)
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState(
-    currentWorkflow?.edges?.length ? currentWorkflow.edges : initialEdges
+    normalizeEdges(currentWorkflow?.edges)
   );
   const [active, setActive] = useState(currentWorkflow?.isActive ?? true);
   const [testingWorkflow, setTestingWorkflow] = useState(false);
@@ -119,13 +217,13 @@ function Builder() {
   const idRef = useRef(10);
   const selected = nodes.find((n) => n.selected);
 
-  // Sync if current workflow loads from backend
+  // Sync when current workflow loads from backend
   useEffect(() => {
-    if (currentWorkflow?.nodes?.length) {
-      setNodes(currentWorkflow.nodes);
+    if (currentWorkflow?.nodes) {
+      setNodes(normalizeNodes(currentWorkflow.nodes));
     }
-    if (currentWorkflow?.edges?.length) {
-      setEdges(currentWorkflow.edges);
+    if (currentWorkflow?.edges) {
+      setEdges(normalizeEdges(currentWorkflow.edges));
     }
     if (currentWorkflow?.isActive !== undefined) {
       setActive(currentWorkflow.isActive);
@@ -185,10 +283,15 @@ function Builder() {
     toast(next ? "Workflow activated" : "Workflow paused");
   };
 
+  const handleResetToDefault = () => {
+    setNodes(initialNodes);
+    setEdges(initialEdges);
+    toast.info("Reset to default workflow template");
+  };
+
   const handleTestRun = async () => {
     setTestingWorkflow(true);
     try {
-      // Ensure workflow is saved if new
       let wfId = currentWorkflow?._id;
       if (!wfId) {
         await workflows.save({
@@ -223,6 +326,17 @@ function Builder() {
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
+              size="sm"
+              onClick={handleResetToDefault}
+              className="text-xs"
+              title="Reset canvas to default steps"
+            >
+              <RotateCcw className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+              Reset Canvas
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               disabled={testingWorkflow}
               onClick={handleTestRun}
               className="text-xs"
@@ -230,11 +344,11 @@ function Builder() {
               <Sparkles className="h-3.5 w-3.5 mr-1 text-primary" />
               {testingWorkflow ? "Running…" : "Simulate Run"}
             </Button>
-            <Button variant="outline" onClick={handleToggleActive} className="text-xs">
+            <Button variant="outline" size="sm" onClick={handleToggleActive} className="text-xs">
               <Play className={`h-3.5 w-3.5 mr-1 ${active ? "text-success" : ""}`} />
               {active ? "Active" : "Paused"}
             </Button>
-            <Button onClick={handleSave} className="bg-gradient-brand shadow-glow text-xs">
+            <Button size="sm" onClick={handleSave} className="bg-gradient-brand shadow-glow text-xs">
               <Save className="h-3.5 w-3.5 mr-1" /> Save Workflow
             </Button>
           </div>
@@ -286,20 +400,20 @@ function Builder() {
                   Step Config
                 </h4>
                 <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] uppercase font-mono">
-                  {selected.data.kind}
+                  {selected.data?.kind || "step"}
                 </span>
               </div>
 
               <div className="grid gap-1.5">
                 <Label className="text-xs">Step Label / Action</Label>
                 <Input
-                  value={selected.data.text}
+                  value={selected.data?.text || ""}
                   onChange={(e) => updateText(e.target.value)}
                   className="h-8 text-xs"
                 />
               </div>
 
-              {selected.data.kind === "email" && (
+              {selected.data?.kind === "email" && (
                 <div className="grid gap-1.5">
                   <Label className="text-xs">Attach Template</Label>
                   <Select
@@ -322,7 +436,7 @@ function Builder() {
                 </div>
               )}
 
-              {selected.data.kind === "delay" && (
+              {selected.data?.kind === "delay" && (
                 <div className="grid gap-1.5">
                   <Label className="text-xs">Quick Duration</Label>
                   <Select onValueChange={(val) => updateText(val)}>

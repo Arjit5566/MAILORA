@@ -289,9 +289,9 @@ router.post("/:id/trigger", async (req: Request, res: Response) => {
             trigger: "contact_added",
             isActive: true,
             nodes: [
-              { id: "1", type: "flow", data: { kind: "trigger", text: "Contact signs up" } },
-              { id: "2", type: "flow", data: { kind: "email", text: "Welcome & Onboarding Email" } },
-              { id: "3", type: "flow", data: { kind: "delay", text: "Wait 2 days" } },
+              { id: "1", type: "flow", position: { x: 200, y: 20 }, data: { kind: "trigger", text: "Contact signs up" } },
+              { id: "2", type: "flow", position: { x: 200, y: 130 }, data: { kind: "email", text: "Welcome & Onboarding Email" } },
+              { id: "3", type: "flow", position: { x: 200, y: 240 }, data: { kind: "delay", text: "Wait 2 days" } },
             ],
             edges: [{ id: "1-2", source: "1", target: "2" }, { id: "2-3", source: "2", target: "3" }],
             executionsCount: 0,
