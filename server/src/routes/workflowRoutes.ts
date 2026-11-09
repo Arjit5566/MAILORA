@@ -290,10 +290,19 @@ router.post("/:id/trigger", async (req: Request, res: Response) => {
             isActive: true,
             nodes: [
               { id: "1", type: "flow", position: { x: 200, y: 20 }, data: { kind: "trigger", text: "Contact signs up" } },
-              { id: "2", type: "flow", position: { x: 200, y: 130 }, data: { kind: "email", text: "Welcome & Onboarding Email" } },
-              { id: "3", type: "flow", position: { x: 200, y: 240 }, data: { kind: "delay", text: "Wait 2 days" } },
+              { id: "2", type: "flow", position: { x: 30, y: 148 }, data: { kind: "email", text: "welcome to my websitez" } },
+              { id: "3", type: "flow", position: { x: 200, y: 240 }, data: { kind: "delay", text: "Wait 3 days" } },
+              { id: "4", type: "flow", position: { x: 394, y: 350 }, data: { kind: "condition", text: "Opened welcome?" } },
+              { id: "5", type: "flow", position: { x: 40, y: 470 }, data: { kind: "email", text: "Day 3 tips" } },
+              { id: "6", type: "flow", position: { x: 360, y: 470 }, data: { kind: "tag", text: "needs-nudge" } },
             ],
-            edges: [{ id: "1-2", source: "1", target: "2" }, { id: "2-3", source: "2", target: "3" }],
+            edges: [
+              { id: "1-2", source: "1", target: "2", animated: true, style: { stroke: "var(--primary)", strokeWidth: 2 } },
+              { id: "2-3", source: "2", target: "3", animated: true, style: { stroke: "var(--primary)", strokeWidth: 2 } },
+              { id: "3-4", source: "3", target: "4", animated: true, style: { stroke: "var(--primary)", strokeWidth: 2 } },
+              { id: "4-5", source: "4", target: "5", animated: true, style: { stroke: "var(--primary)", strokeWidth: 2 } },
+              { id: "4-6", source: "4", target: "6", animated: true, style: { stroke: "var(--primary)", strokeWidth: 2 } },
+            ],
             executionsCount: 0,
           },
         });
