@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { config } from "../config/env.js";
-import { prisma } from "../config/prismaClient.js";
 
 export interface AuthRequest extends Request {
   userId?: string;
   userEmail?: string;
+  userName?: string;
 }
 
 export async function authenticate(
@@ -26,24 +26,16 @@ export async function authenticate(
       return;
     }
 
+    // Decode JWT only — no DB round-trip needed here (user id/email/name are embedded in the token)
     const decoded = jwt.verify(token, config.jwtSecret) as {
       userId: string;
       email: string;
+      name?: string;
     };
 
-    // Verify user still exists in DB
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { id: true, email: true },
-    });
-
-    if (!user) {
-      res.status(401).json({ error: "User not found" });
-      return;
-    }
-
-    req.userId = user.id;
-    req.userEmail = user.email;
+    req.userId = decoded.userId;
+    req.userEmail = decoded.email;
+    req.userName = decoded.name;
     next();
   } catch (err: any) {
     if (err.name === "TokenExpiredError") {
@@ -55,4 +47,3 @@ export async function authenticate(
     }
   }
 }
-

@@ -106,6 +106,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(parsed);
         setToken(storedToken);
         axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
+        // If we have a cached user and there's NO OAuth return, skip the /me check
+        // and mark loading done immediately for instant app load
+        const hasOAuthReturnEarly =
+          window.location.hash.includes("access_token") ||
+          window.location.search.includes("code=");
+        if (!hasOAuthReturnEarly && !isSupabaseConfigured) {
+          setLoading(false);
+          return;
+        }
       } catch {
         // ignore invalid JSON
       }
@@ -117,10 +126,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         (window.location.hash.includes("access_token") || window.location.search.includes("code="));
 
       // If returning from Google OAuth, prioritize fresh OAuth exchange over old cached token
-      if (!hasOAuthReturn && storedToken) {
+      // Otherwise skip /me network call if we already have a valid cached user
+      if (!hasOAuthReturn && storedToken && !safeStorage.getItem("sendflow_user")) {
         try {
           const res = await axios.get(`${AUTH_API_URL}/me`, {
             headers: { Authorization: `Bearer ${storedToken}` },
+            timeout: 4000,
           });
           if (res.data?.user) {
             setUser(res.data.user);
@@ -130,6 +141,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Token invalid or expired
           clearAuth();
         }
+      } else if (!storedToken) {
+        // No token at all – nothing to validate
       }
 
       // Check if arriving back from Supabase Google OAuth callback

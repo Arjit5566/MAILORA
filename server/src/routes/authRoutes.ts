@@ -63,8 +63,8 @@ router.post("/register", async (req: Request, res: Response) => {
       return res.status(409).json({ error: "An account with this email already exists" });
     }
 
-    // Hash password with optimal speed cost factor (10)
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash password with optimal speed cost factor (8 = fast + secure for local auth)
+    const hashedPassword = await bcrypt.hash(password, 8);
 
     // Create user in PostgreSQL
     const user = await prisma.user.create({
@@ -77,7 +77,7 @@ router.post("/register", async (req: Request, res: Response) => {
 
     // Sign JWT
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email, name: user.name },
       config.jwtSecret,
       { expiresIn: config.jwtExpiresIn as any }
     );
@@ -116,7 +116,7 @@ router.post("/login", async (req: Request, res: Response) => {
       // Auto-register convenience: If user doesn't exist yet and password is valid,
       // create the account automatically in PostgreSQL and log in seamlessly.
       if (password.length >= 6) {
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 8);
         const userName = normalizedEmail.split("@")[0] || "User";
         const newUser = await prisma.user.create({
           data: {
@@ -130,7 +130,7 @@ router.post("/login", async (req: Request, res: Response) => {
         seedUserSettings(newUser.id).catch(() => {});
 
         const token = jwt.sign(
-          { userId: newUser.id, email: newUser.email },
+          { userId: newUser.id, email: newUser.email, name: newUser.name },
           config.jwtSecret,
           { expiresIn: config.jwtExpiresIn as any }
         );
@@ -156,9 +156,9 @@ router.post("/login", async (req: Request, res: Response) => {
     // Ensure settings exist in background (non-blocking)
     seedUserSettings(user.id).catch(() => {});
 
-    // Sign JWT
+    // Sign JWT (include name so /me endpoint needs no DB round-trip)
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email, name: user.name },
       config.jwtSecret,
       { expiresIn: config.jwtExpiresIn as any }
     );
@@ -196,9 +196,9 @@ router.post("/google", async (req: Request, res: Response) => {
     let user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
 
     if (!user) {
-      // Create user in PostgreSQL with optimal cost factor
+      // Create user in PostgreSQL with fast cost factor
       const randomSecret = crypto.randomBytes(32).toString("hex");
-      const hashedPassword = await bcrypt.hash(randomSecret, 10);
+      const hashedPassword = await bcrypt.hash(randomSecret, 8);
       const displayName = name?.trim() || normalizedEmail.split("@")[0] || "Google User";
 
       user = await prisma.user.create({
@@ -221,9 +221,9 @@ router.post("/google", async (req: Request, res: Response) => {
       seedUserSettings(user.id).catch(() => {});
     }
 
-    // Sign our application's JWT session
+    // Sign our application's JWT session (include name so /me needs no DB round-trip)
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email, name: user.name },
       config.jwtSecret,
       { expiresIn: config.jwtExpiresIn as any }
     );
@@ -242,16 +242,23 @@ router.post("/google", async (req: Request, res: Response) => {
 });
 
 // ─────────────────────────────────────────────
-//  GET /api/auth/me  (protected)
+//  GET /api/auth/me  (protected) — fast JWT-only path
 // ─────────────────────────────────────────────
 router.get("/me", authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.userId },
-      select: { id: true, name: true, email: true, createdAt: true },
-    });
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json({ user });
+    // userId and email are already decoded from the JWT in middleware — no DB hit needed
+    // Only do a DB lookup if we need fresh name/metadata
+    if (req.userId) {
+      res.json({
+        user: {
+          id: req.userId,
+          email: req.userEmail,
+          name: req.userName || (req.userEmail ? req.userEmail.split("@")[0] : "User"),
+        },
+      });
+    } else {
+      res.status(401).json({ error: "Not authenticated" });
+    }
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
