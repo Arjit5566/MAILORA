@@ -92,6 +92,7 @@ export function Campaigns() {
   const [editing, setEditing] = useState<Campaign | null>(null);
   const [activeFormTab, setActiveFormTab] = useState<"details" | "recipients" | "content">("details");
   const [previewMode, setPreviewMode] = useState(false);
+  const [previewRecipientIdx, setPreviewRecipientIdx] = useState(0);
 
   // Form values
   const [formName, setFormName] = useState("");
@@ -1251,23 +1252,153 @@ export function Campaigns() {
                 </div>
 
                 {/* Editor vs Preview */}
-                {previewMode ? (
-                  <div className="border rounded-xl p-4 bg-background min-h-[300px]">
-                    <div className="text-xs text-muted-foreground mb-3 pb-2 border-b flex justify-between">
-                      <span>Previewing rendered email for: <strong>Jane Doe (jane@example.com)</strong></span>
-                      <span>Subject: <strong>{formSubject.replace(/{{name}}/g, "Jane Doe")}</strong></span>
+                {previewMode ? (() => {
+                  // Determine who to preview — real recipient or fallback
+                  const validRecs = selectedRecipients;
+                  const previewRec = validRecs.length > 0
+                    ? validRecs[Math.min(previewRecipientIdx, validRecs.length - 1)]
+                    : null;
+                  const previewName = previewRec?.name || "Jane Doe";
+                  const previewEmail = previewRec?.email || "jane@example.com";
+
+                  return (
+                    <div className="space-y-3">
+                      {/* Recipient selector bar */}
+                      <div className="flex flex-wrap items-center gap-3 p-3 bg-muted/40 rounded-xl border">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                          <UserCheck className="h-3.5 w-3.5 text-primary" />
+                          Preview as recipient:
+                        </div>
+                        {validRecs.length > 0 ? (
+                          <>
+                            <Select
+                              value={String(Math.min(previewRecipientIdx, validRecs.length - 1))}
+                              onValueChange={(v) => setPreviewRecipientIdx(Number(v))}
+                            >
+                              <SelectTrigger className="h-7 text-xs w-auto min-w-[200px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {validRecs.map((r, idx) => (
+                                  <SelectItem key={r.id} value={String(idx)} className="text-xs">
+                                    {r.name} &lt;{r.email}&gt;
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <span className="text-[11px] text-muted-foreground">
+                              {previewRecipientIdx + 1} of {validRecs.length} recipient(s)
+                            </span>
+                            <div className="flex gap-1 ml-auto">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs px-2"
+                                disabled={previewRecipientIdx === 0}
+                                onClick={() => setPreviewRecipientIdx((i) => Math.max(0, i - 1))}
+                              >
+                                ← Prev
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs px-2"
+                                disabled={previewRecipientIdx >= validRecs.length - 1}
+                                onClick={() => setPreviewRecipientIdx((i) => Math.min(validRecs.length - 1, i + 1))}
+                              >
+                                Next →
+                              </Button>
+                            </div>
+                          </>
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground italic">
+                            No recipients added yet — showing placeholder preview. Add recipients in the Recipients tab.
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Two-column layout: email preview + recipients sidebar */}
+                      <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-3">
+                        {/* Email preview pane */}
+                        <div className="border rounded-xl bg-background overflow-hidden">
+                          {/* Email header bar */}
+                          <div className="bg-muted/50 border-b px-4 py-2.5 space-y-1 text-xs">
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground w-14 shrink-0">From:</span>
+                              <span className="font-medium text-foreground">{formFromName || "SendFlow Studio"} &lt;{formFromEmail || "notifications@sendflow.app"}&gt;</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground w-14 shrink-0">To:</span>
+                              <span className="font-medium text-foreground">{previewName} &lt;{previewEmail}&gt;</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground w-14 shrink-0">Subject:</span>
+                              <span className="font-semibold text-foreground">
+                                {formSubject
+                                  .replace(/{{name}}/g, previewName)
+                                  .replace(/{{email}}/g, previewEmail)
+                                  .replace(/{{company}}/g, "Acme Corp") || "(No subject)"}
+                              </span>
+                            </div>
+                          </div>
+                          {/* Rendered HTML body */}
+                          <div className="p-5 min-h-[260px]">
+                            <div
+                              className="prose dark:prose-invert max-w-none text-sm"
+                              dangerouslySetInnerHTML={{
+                                __html: formHtml
+                                  .replace(/{{name}}/g, previewName)
+                                  .replace(/{{email}}/g, previewEmail)
+                                  .replace(/{{company}}/g, "Acme Corp"),
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Recipients sidebar */}
+                        <div className="border rounded-xl bg-muted/20 overflow-hidden flex flex-col">
+                          <div className="px-3 py-2 border-b bg-muted/40 text-xs font-semibold text-foreground flex items-center gap-1.5">
+                            <Users className="h-3.5 w-3.5 text-primary" />
+                            Recipients ({validRecs.length})
+                          </div>
+                          <ScrollArea className="flex-1 max-h-[320px]">
+                            {validRecs.length === 0 ? (
+                              <div className="py-6 text-center text-[11px] text-muted-foreground px-3">
+                                No recipients selected yet.
+                                <br />Go to <strong>Recipients</strong> tab to add some.
+                              </div>
+                            ) : (
+                              <div className="divide-y divide-border/30">
+                                {validRecs.map((r, idx) => (
+                                  <button
+                                    key={r.id}
+                                    type="button"
+                                    onClick={() => setPreviewRecipientIdx(idx)}
+                                    className={`w-full text-left px-3 py-2 transition-colors hover:bg-accent/50 ${
+                                      idx === Math.min(previewRecipientIdx, validRecs.length - 1)
+                                        ? "bg-primary/10 border-l-2 border-primary"
+                                        : ""
+                                    }`}
+                                  >
+                                    <div className="text-xs font-medium text-foreground truncate">{r.name}</div>
+                                    <div className="text-[10px] text-muted-foreground truncate">{r.email}</div>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </ScrollArea>
+                          {validRecs.length > 0 && (
+                            <div className="px-3 py-2 border-t bg-muted/30 text-[10px] text-muted-foreground">
+                              Click a name to preview their personalised email
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div
-                      className="prose dark:prose-invert max-w-none text-sm"
-                      dangerouslySetInnerHTML={{
-                        __html: formHtml
-                          .replace(/{{name}}/g, "Jane Doe")
-                          .replace(/{{email}}/g, "jane@example.com")
-                          .replace(/{{company}}/g, "Acme Corp"),
-                      }}
-                    />
-                  </div>
-                ) : (
+                  );
+                })() : (
                   <div className="space-y-1.5">
                     <RichEditor value={formHtml} onChange={setFormHtml} />
                   </div>
