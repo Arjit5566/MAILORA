@@ -1,0 +1,59 @@
+services:
+  # ─────────────────────────────────────────────────────────────
+  # 1. Backend Web Service (Express + PostgreSQL / Supabase API)
+  # ─────────────────────────────────────────────────────────────
+  - type: web
+    name: mailora-backend
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: postgresql://postgres.oypoblxdgiarjtykkkml:AJJU123%40123@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres
+      - key: JWT_SECRET
+        value: sendflow_jwt_secret_super_secure_key_2026_dev
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: EMAIL_PROVIDER
+        value: smtp
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        value: arjitripathi0607@gmail.com
+      - key: SMTP_PASS
+        value: negqrwokcgjnmcjw
+      - key: FROM_EMAIL
+        value: arjitripathi0607@gmail.com
+      - key: FROM_NAME
+        value: Arjit Tripathi
+      - key: API_BASE_URL
+        value: https://mailora-1.onrender.com
+
+  # ─────────────────────────────────────────────────────────────
+  # 2. Frontend Web Service (Mailora Studio UI on Node)
+  # ─────────────────────────────────────────────────────────────
+  - type: web
+    name: mailora-frontend
+    runtime: node
+    plan: free
+    buildCommand: npm install --include=dev && NITRO_PRESET=node-server npm run build
+    startCommand: node .output/server/index.mjs
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NITRO_PRESET
+        value: node-server
+      - key: VITE_API_URL
+        value: https://mailora-1.onrender.com/api
+      - key: VITE_SUPABASE_URL
+        value: https://oypoblxdgiarjtykkkml.supabase.co
+      - key: VITE_SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95cG9ibHhkZ2lhcmp0eWtra21sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQxMTkwNzgsImV4cCI6MjEwOTY5NTA3OH0.cB9yOmjcMrQMp2LoJ2kt_jW_VvYtG7GkhOi_f-aZUvA
