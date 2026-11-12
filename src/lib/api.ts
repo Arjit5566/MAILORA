@@ -1,10 +1,10 @@
-// Backend integration layer. Point VITE_API_URL at your Node/Express + MongoDB API
-// Default to http://localhost:4000/api in dev.
+// Backend integration layer. Point VITE_API_URL at your Node/Express + Supabase/Prisma API
+// Fallback gracefully to the live Render backend in production so connections never fail with localhost refused
 export const API_URL =
   (import.meta.env["VITE_API_URL"] as string | undefined) ||
   (typeof window !== "undefined" && window.location.hostname === "localhost"
     ? "http://localhost:4000/api"
-    : undefined);
+    : "https://mailora-1.onrender.com/api");
 
 export type CampaignStatus = "draft" | "scheduled" | "sending" | "sent" | "paused" | "failed";
 
@@ -106,7 +106,7 @@ export interface EmailSettings {
 }
 
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const url = `${API_URL || "http://localhost:4000/api"}${path}`;
+  const url = `${API_URL || "https://mailora-1.onrender.com/api"}${path}`;
   const token = typeof window !== "undefined" ? localStorage.getItem("sendflow_token") : null;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",

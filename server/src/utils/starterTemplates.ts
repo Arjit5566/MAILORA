@@ -30,7 +30,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     </div>
 
     <div style="text-align: center; margin: 32px 0 20px 0;">
-      <a href="http://localhost:8080" style="background: #4f46e5; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);">Go to Your Dashboard &rarr;</a>
+      <a href="https://mailora-lyart.vercel.app" style="background: #4f46e5; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);">Go to Your Dashboard &rarr;</a>
     </div>
   </div>
   <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8;">
@@ -68,7 +68,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     </div>
 
     <div style="text-align: center; margin: 30px 0 10px 0;">
-      <a href="http://localhost:8080" style="background: #0f172a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Try the New Features &rarr;</a>
+      <a href="https://mailora-lyart.vercel.app" style="background: #0f172a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Try the New Features &rarr;</a>
     </div>
   </div>
   <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 18px; text-align: center; font-size: 12px; color: #94a3b8;">
@@ -90,18 +90,18 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     
     <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 18px; margin-bottom: 18px;">
       <span style="font-size: 11px; font-weight: 700; color: #8b5cf6; text-transform: uppercase;">Guide of the Month</span>
-      <h3 style="margin: 6px 0; font-size: 17px; color: #0f172a;"><a href="http://localhost:8080" style="color: #0f172a; text-decoration: none;">How to maintain a 99.2% inbox placement rate in 2026</a></h3>
+      <h3 style="margin: 6px 0; font-size: 17px; color: #0f172a;"><a href="https://mailora-lyart.vercel.app" style="color: #0f172a; text-decoration: none;">How to maintain a 99.2% inbox placement rate in 2026</a></h3>
       <p style="margin: 0; font-size: 14px; color: #64748b;">Understanding SPF, DKIM, and DMARC alignment to ensure your cold and transactional emails skip the spam tab.</p>
     </div>
 
     <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 18px; margin-bottom: 18px;">
       <span style="font-size: 11px; font-weight: 700; color: #8b5cf6; text-transform: uppercase;">Benchmark Report</span>
-      <h3 style="margin: 6px 0; font-size: 17px; color: #0f172a;"><a href="http://localhost:8080" style="color: #0f172a; text-decoration: none;">Average open rates across 14 B2B and B2C industries</a></h3>
+      <h3 style="margin: 6px 0; font-size: 17px; color: #0f172a;"><a href="https://mailora-lyart.vercel.app" style="color: #0f172a; text-decoration: none;">Average open rates across 14 B2B and B2C industries</a></h3>
       <p style="margin: 0; font-size: 14px; color: #64748b;">See how your recent campaigns compare against industry leaders.</p>
     </div>
 
     <div style="text-align: center; margin-top: 24px;">
-      <a href="http://localhost:8080" style="background: #6d28d9; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; display: inline-block;">Read Full Archive &rarr;</a>
+      <a href="https://mailora-lyart.vercel.app" style="background: #6d28d9; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; display: inline-block;">Read Full Archive &rarr;</a>
     </div>
   </div>
   <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 12px; color: #94a3b8;">
@@ -129,7 +129,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     </div>
 
     <div style="margin: 28px 0 12px 0;">
-      <a href="http://localhost:8080" style="background: #d97706; color: #ffffff; padding: 14px 34px; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);">Claim Your 30% Discount &rarr;</a>
+      <a href="https://mailora-lyart.vercel.app" style="background: #d97706; color: #ffffff; padding: 14px 34px; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);">Claim Your 30% Discount &rarr;</a>
     </div>
   </div>
   <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 18px; text-align: center; font-size: 12px; color: #94a3b8;">
@@ -183,7 +183,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     </div>
 
     <div style="text-align: center; margin: 28px 0 10px 0;">
-      <a href="http://localhost:8080" style="background: #0284c7; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Reserve Your Free Seat &rarr;</a>
+      <a href="https://mailora-lyart.vercel.app" style="background: #0284c7; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Reserve Your Free Seat &rarr;</a>
     </div>
   </div>
   <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 12px; color: #94a3b8;">
@@ -203,11 +203,11 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
   <p style="font-size: 13px; color: #64748b; margin-bottom: 20px;">On a scale of 1 to 5, how likely are you to recommend us to a friend or colleague?</p>
   
   <div style="margin: 24px 0;">
-    <a href="http://localhost:8080?score=1" style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; background: #fee2e2; color: #991b1b; font-weight: 700; margin: 0 4px; text-decoration: none; font-size: 16px;">1</a>
-    <a href="http://localhost:8080?score=2" style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; background: #ffedd5; color: #9a3412; font-weight: 700; margin: 0 4px; text-decoration: none; font-size: 16px;">2</a>
-    <a href="http://localhost:8080?score=3" style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; background: #fef9c3; color: #854d0e; font-weight: 700; margin: 0 4px; text-decoration: none; font-size: 16px;">3</a>
-    <a href="http://localhost:8080?score=4" style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; background: #dcfce7; color: #166534; font-weight: 700; margin: 0 4px; text-decoration: none; font-size: 16px;">4</a>
-    <a href="http://localhost:8080?score=5" style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; background: #bbf7d0; color: #14532d; font-weight: 700; margin: 0 4px; text-decoration: none; font-size: 16px;">5</a>
+    <a href="https://mailora-lyart.vercel.app?score=1" style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; background: #fee2e2; color: #991b1b; font-weight: 700; margin: 0 4px; text-decoration: none; font-size: 16px;">1</a>
+    <a href="https://mailora-lyart.vercel.app?score=2" style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; background: #ffedd5; color: #9a3412; font-weight: 700; margin: 0 4px; text-decoration: none; font-size: 16px;">2</a>
+    <a href="https://mailora-lyart.vercel.app?score=3" style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; background: #fef9c3; color: #854d0e; font-weight: 700; margin: 0 4px; text-decoration: none; font-size: 16px;">3</a>
+    <a href="https://mailora-lyart.vercel.app?score=4" style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; background: #dcfce7; color: #166534; font-weight: 700; margin: 0 4px; text-decoration: none; font-size: 16px;">4</a>
+    <a href="https://mailora-lyart.vercel.app?score=5" style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; background: #bbf7d0; color: #14532d; font-weight: 700; margin: 0 4px; text-decoration: none; font-size: 16px;">5</a>
   </div>
   
   <p style="font-size: 12px; color: #94a3b8; margin: 24px 0 0 0;">Takes less than 30 seconds · Your feedback directly shapes our roadmap</p>
@@ -237,7 +237,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     </div>
 
     <div style="text-align: center; margin: 28px 0 10px 0;">
-      <a href="http://localhost:8080" style="background: #e11d48; color: #ffffff; padding: 14px 34px; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);">Complete Your Order Now &rarr;</a>
+      <a href="https://mailora-lyart.vercel.app" style="background: #e11d48; color: #ffffff; padding: 14px 34px; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);">Complete Your Order Now &rarr;</a>
     </div>
   </div>
   <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 12px; color: #94a3b8;">
@@ -269,7 +269,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     </div>
 
     <div style="text-align: center; margin: 26px 0 10px 0;">
-      <a href="http://localhost:8080" style="background: #4f46e5; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Upgrade My Account &rarr;</a>
+      <a href="https://mailora-lyart.vercel.app" style="background: #4f46e5; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Upgrade My Account &rarr;</a>
     </div>
   </div>
   <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 12px; color: #94a3b8;">
@@ -297,7 +297,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     </div>
 
     <div style="text-align: center; margin: 28px 0 10px 0;">
-      <a href="http://localhost:8080" style="background: #0d9488; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Read the Full Case Study &rarr;</a>
+      <a href="https://mailora-lyart.vercel.app" style="background: #0d9488; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Read the Full Case Study &rarr;</a>
     </div>
   </div>
   <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 12px; color: #94a3b8;">
@@ -320,11 +320,11 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     
     <div style="background: #fdf4ff; border: 1px solid #f5d0fe; padding: 14px; border-radius: 10px; margin: 20px auto; max-width: 360px;">
       <div style="font-size: 11px; text-transform: uppercase; color: #a21caf; font-weight: 700; margin-bottom: 4px;">Your Personal Referral Link</div>
-      <div style="font-family: monospace; font-size: 14px; color: #701a75; font-weight: 600;">http://localhost:8080/ref/{{name}}</div>
+      <div style="font-family: monospace; font-size: 14px; color: #701a75; font-weight: 600;">https://mailora-lyart.vercel.app/ref/{{name}}</div>
     </div>
 
     <div style="margin: 24px 0 10px 0;">
-      <a href="http://localhost:8080" style="background: #c026d3; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Share Referral Link &rarr;</a>
+      <a href="https://mailora-lyart.vercel.app" style="background: #c026d3; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Share Referral Link &rarr;</a>
     </div>
   </div>
   <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 12px; color: #94a3b8;">
@@ -349,7 +349,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
   </div>
 
   <div style="margin: 26px 0 10px 0;">
-    <a href="http://localhost:8080" style="background: #0284c7; color: #ffffff; padding: 14px 34px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Jump Back In &rarr;</a>
+    <a href="https://mailora-lyart.vercel.app" style="background: #0284c7; color: #ffffff; padding: 14px 34px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Jump Back In &rarr;</a>
   </div>
   
   <p style="font-size: 12px; color: #94a3b8; margin-top: 24px;">No longer interested? <a href="{{unsubscribe_link}}" style="color: #64748b;">Unsubscribe</a></p>
@@ -378,7 +378,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     <p style="color: #475569; font-size: 14px;">If this was you, you can safely ignore this email. If you did not perform this login, please secure your account immediately.</p>
 
     <div style="text-align: center; margin: 24px 0 10px 0;">
-      <a href="http://localhost:8080/reset-password" style="background: #ef4444; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; display: inline-block;">Secure Account & Reset Password &rarr;</a>
+      <a href="https://mailora-lyart.vercel.app/reset-password" style="background: #ef4444; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; display: inline-block;">Secure Account & Reset Password &rarr;</a>
     </div>
   </div>
   <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 12px; color: #94a3b8;">
@@ -414,7 +414,7 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
     <p style="color: #475569; font-size: 14px;">Thank you for building with {{company}}. We have major new releases coming your way in the new year!</p>
 
     <div style="text-align: center; margin: 28px 0 10px 0;">
-      <a href="http://localhost:8080/analytics" style="background: #4f46e5; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Explore Full Year Analytics &rarr;</a>
+      <a href="https://mailora-lyart.vercel.app/analytics" style="background: #4f46e5; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Explore Full Year Analytics &rarr;</a>
     </div>
   </div>
   <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 12px; color: #94a3b8;">

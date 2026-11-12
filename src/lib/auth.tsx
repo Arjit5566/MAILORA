@@ -25,7 +25,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Base URL for auth endpoints
-const AUTH_API_URL = `${API_URL || "http://localhost:4000/api"}/auth`;
+const AUTH_API_URL = `${API_URL || "https://mailora-1.onrender.com/api"}/auth`;
 
 // SSR-safe storage abstraction
 const safeStorage = {

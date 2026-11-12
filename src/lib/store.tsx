@@ -224,7 +224,7 @@ function useStoreValue() {
       const token = localStorage.getItem("auth_token") || localStorage.getItem("token");
       const headers: HeadersInit = {};
       if (token) headers["Authorization"] = `Bearer ${token}`;
-      const res = await fetch(`${API_URL || "http://localhost:4000/api"}/contacts/import-csv`, {
+      const res = await fetch(`${API_URL || "https://mailora-1.onrender.com/api"}/contacts/import-csv`, {
         method: "POST",
         headers,
         body: formData,

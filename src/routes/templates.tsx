@@ -190,7 +190,7 @@ export function Templates() {
       .replace(/{{\s*first_name\s*}}/gi, "Arjit")
       .replace(/{{\s*company\s*}}/gi, "SendFlow Studio")
       .replace(/{{\s*email\s*}}/gi, "arjitripathi0607@gmail.com")
-      .replace(/{{\s*unsubscribe_link\s*}}/gi, "http://localhost:8080/unsubscribe");
+      .replace(/{{\s*unsubscribe_link\s*}}/gi, "https://mailora-lyart.vercel.app/unsubscribe");
   };
 
   // Open Edit or New
@@ -210,7 +210,7 @@ export function Templates() {
   <div style="background: #ffffff; padding: 28px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px;">
     <p>Here is your curated update from {{company}}.</p>
     <div style="text-align: center; margin: 24px 0;">
-      <a href="http://localhost:8080" style="background: #4f46e5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Get Started</a>
+      <a href="https://mailora-lyart.vercel.app" style="background: #4f46e5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Get Started</a>
     </div>
   </div>
 </div>`,
