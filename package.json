@@ -8,6 +8,8 @@
     "server": "npm --prefix server run dev",
     "server:start": "npm --prefix server run start",
     "build": "vite build",
+    "build:render": "NITRO_PRESET=node-server vite build",
+    "start": "node .output/server/index.mjs",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
