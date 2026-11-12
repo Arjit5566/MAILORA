@@ -277,7 +277,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             saveAuth(data.session.access_token, {
               id: data.session.user.id,
               email: normalizedEmail,
-              name: data.session.user.user_metadata?.name || normalizedEmail.split("@")[0] || "User",
+              name: (data.session.user.user_metadata?.["name"] as string | undefined) || normalizedEmail.split("@")[0] || "User",
             });
             return;
           }
