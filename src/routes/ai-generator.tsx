@@ -454,7 +454,15 @@ function AiEmailGeneratorPage() {
         }
       }
     } catch (err: any) {
-      toast.error(err.message || "Failed to process send request");
+      const errMsg = String(err?.message || "");
+      if (errMsg.toLowerCase().includes("failed to fetch")) {
+        toast.error("Backend server unreachable", {
+          description: "Your Render backend (mailora-1) is currently suspended. Please resume it in dashboard.render.com to deliver emails.",
+          duration: 7000,
+        });
+      } else {
+        toast.error(err.message || "Failed to process send request");
+      }
     } finally {
       setIsSending(false);
     }
