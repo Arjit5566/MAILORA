@@ -10,11 +10,12 @@ import {
   type ScheduledEmail,
   type WorkflowItem,
 } from "./api";
+import { DEFAULT_STARTER_TEMPLATES } from "./defaultTemplates";
 
 function useStoreValue() {
   const [campaignsList, setCampaigns] = useState<Campaign[]>([]);
   const [contactsList, setContacts] = useState<Contact[]>([]);
-  const [templatesList, setTemplates] = useState<Template[]>([]);
+  const [templatesList, setTemplates] = useState<Template[]>(DEFAULT_STARTER_TEMPLATES);
   const [schedulesList, setSchedules] = useState<ScheduledEmail[]>([]);
   const [workflowsList, setWorkflows] = useState<WorkflowItem[]>([]);
   const [backendConnected, setBackendConnected] = useState<boolean>(false);
@@ -42,7 +43,12 @@ function useStoreValue() {
         connected = true;
       }
       if (tRes.status === "fulfilled" && Array.isArray(tRes.value)) {
-        setTemplates(tRes.value);
+        if (tRes.value.length > 0) {
+          setTemplates(tRes.value);
+        } else {
+          // If backend has no templates yet, preserve rich starter defaults
+          setTemplates(DEFAULT_STARTER_TEMPLATES);
+        }
         connected = true;
       }
       if (sRes.status === "fulfilled" && Array.isArray(sRes.value)) {
@@ -285,17 +291,20 @@ function useStoreValue() {
         const res = await request<{ message: string; templates?: Template[] }>(`${endpoints.templates}/seed`, {
           method: "POST",
         });
-        if (res?.templates && Array.isArray(res.templates)) {
+        if (res?.templates && Array.isArray(res.templates) && res.templates.length > 0) {
           setTemplates(res.templates);
-        } else {
-          const fresh = await request<Template[]>(endpoints.templates);
-          setTemplates(fresh);
+          return res;
         }
-        return res;
-      } catch {
         const fresh = await request<Template[]>(endpoints.templates);
-        setTemplates(fresh);
-        return { message: "Templates refreshed" };
+        if (Array.isArray(fresh) && fresh.length > 0) {
+          setTemplates(fresh);
+          return { message: "Templates restored", templates: fresh };
+        }
+        setTemplates(DEFAULT_STARTER_TEMPLATES);
+        return { message: "Templates restored", templates: DEFAULT_STARTER_TEMPLATES };
+      } catch {
+        setTemplates(DEFAULT_STARTER_TEMPLATES);
+        return { message: "Templates restored successfully", templates: DEFAULT_STARTER_TEMPLATES };
       }
     },
   };

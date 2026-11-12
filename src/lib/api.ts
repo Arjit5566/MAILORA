@@ -43,6 +43,7 @@ export interface Contact {
 
 export interface Template {
   _id: string;
+  id?: string;
   name: string;
   category: string;
   subject: string;

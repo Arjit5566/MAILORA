@@ -77,6 +77,8 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string
   Referral: { bg: "bg-fuchsia-500/10", text: "text-fuchsia-400", border: "border-fuchsia-500/30", dot: "bg-fuchsia-400" },
   "Case Study": { bg: "bg-teal-500/10", text: "text-teal-400", border: "border-teal-500/30", dot: "bg-teal-400" },
   "Follow-up": { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/30", dot: "bg-blue-400" },
+  Security: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/30", dot: "bg-red-400" },
+  Transactional: { bg: "bg-zinc-500/10", text: "text-zinc-300", border: "border-zinc-500/30", dot: "bg-zinc-400" },
 };
 
 export function Templates() {

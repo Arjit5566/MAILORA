@@ -355,5 +355,72 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
   <p style="font-size: 12px; color: #94a3b8; margin-top: 24px;">No longer interested? <a href="{{unsubscribe_link}}" style="color: #64748b;">Unsubscribe</a></p>
 </div>`,
   },
+  {
+    name: "Security Alert & New Login Notification",
+    category: "Security",
+    subject: "🛡️ New login detected for your {{company}} account",
+    html: `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; color: #1e293b; line-height: 1.6; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;">
+  <div style="background: #0f172a; padding: 32px 24px; text-align: center;">
+    <span style="font-size: 36px;">🛡️</span>
+    <h1 style="color: #ffffff; margin: 12px 0 6px 0; font-size: 22px; font-weight: 800;">Security Notification</h1>
+    <p style="color: #94a3b8; margin: 0; font-size: 14px;">We noticed a recent sign-in to your account</p>
+  </div>
+  <div style="padding: 28px;">
+    <p style="font-size: 15px; margin-top: 0;">Hi {{name}},</p>
+    <p style="color: #475569; font-size: 14px;">Your {{company}} account was recently signed into from a new browser or device. Here are the session details:</p>
+    
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin: 20px 0; font-size: 13px;">
+      <p style="margin: 0 0 6px 0; color: #334155;"><strong>Time:</strong> Just now</p>
+      <p style="margin: 0 0 6px 0; color: #334155;"><strong>Device:</strong> Desktop / Web Browser</p>
+      <p style="margin: 0; color: #334155;"><strong>Status:</strong> Successfully authenticated</p>
+    </div>
+
+    <p style="color: #475569; font-size: 14px;">If this was you, you can safely ignore this email. If you did not perform this login, please secure your account immediately.</p>
+
+    <div style="text-align: center; margin: 24px 0 10px 0;">
+      <a href="http://localhost:8080/reset-password" style="background: #ef4444; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; display: inline-block;">Secure Account & Reset Password &rarr;</a>
+    </div>
+  </div>
+  <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 12px; color: #94a3b8;">
+    <p style="margin: 0;">{{company}} Security Team · Automated Security Alert</p>
+  </div>
+</div>`,
+  },
+  {
+    name: "Year-End Milestones & Growth Celebration",
+    category: "Newsletter",
+    subject: "🏆 Your 2026 Year in Review with {{company}}",
+    html: `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b; line-height: 1.6; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;">
+  <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 36px 24px; text-align: center;">
+    <span style="font-size: 36px;">🎉</span>
+    <h1 style="color: #ffffff; margin: 12px 0 6px 0; font-size: 26px; font-weight: 800;">Your Year in Review</h1>
+    <p style="color: #e0e7ff; margin: 0; font-size: 15px;">Celebrating your email growth and engagement milestones</p>
+  </div>
+  <div style="padding: 30px 28px;">
+    <p style="font-size: 15px; margin-top: 0;">Hi {{name}},</p>
+    <p style="color: #475569; font-size: 15px;">What an incredible year! Together with {{company}}, you reached new heights with your audience. Here is a quick snapshot of what you accomplished:</p>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0;">
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 10px; text-align: center;">
+        <div style="font-size: 24px; font-weight: 800; color: #4f46e5;">99.4%</div>
+        <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Average Deliverability</div>
+      </div>
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 10px; text-align: center;">
+        <div style="font-size: 24px; font-weight: 800; color: #7c3aed;">3.2x</div>
+        <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Click-Through Growth</div>
+      </div>
+    </div>
+
+    <p style="color: #475569; font-size: 14px;">Thank you for building with {{company}}. We have major new releases coming your way in the new year!</p>
+
+    <div style="text-align: center; margin: 28px 0 10px 0;">
+      <a href="http://localhost:8080/analytics" style="background: #4f46e5; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px; display: inline-block;">Explore Full Year Analytics &rarr;</a>
+    </div>
+  </div>
+  <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; text-align: center; font-size: 12px; color: #94a3b8;">
+    <p style="margin: 0;">{{company}} Year-End Recap · <a href="{{unsubscribe_link}}" style="color: #64748b;">Unsubscribe</a></p>
+  </div>
+</div>`,
+  },
 ];
 
