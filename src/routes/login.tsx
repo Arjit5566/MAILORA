@@ -65,13 +65,25 @@ function LoginPage() {
     }
   }, []);
 
-  // If OAuth successfully completed and user is newly authenticated, take them to dashboard
+  // If user is already authenticated (or newly authenticated), take them to dashboard
   useEffect(() => {
-    if (oauthProcessing && user) {
-      setOauthProcessing(false);
+    if (user) {
+      if (oauthProcessing) setOauthProcessing(false);
       navigate({ to: search.redirect || "/" });
     }
-  }, [oauthProcessing, user, navigate, search.redirect]);
+  }, [user, oauthProcessing, navigate, search.redirect]);
+
+  // Failsafe timeout for OAuth processing to ensure user is never stuck on spinner
+  useEffect(() => {
+    if (!oauthProcessing) return;
+    const timeout = setTimeout(() => {
+      setOauthProcessing(false);
+      if (typeof window !== "undefined") {
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+    }, 4500);
+    return () => clearTimeout(timeout);
+  }, [oauthProcessing]);
 
   // Update token if present in query param
   useEffect(() => {
@@ -198,11 +210,23 @@ function LoginPage() {
               <p className="text-sm text-muted-foreground">
                 Finalizing secure OAuth authentication and syncing your profile with the database...
               </p>
-              <div className="pt-2">
+              <div className="pt-2 flex flex-col items-center gap-3">
                 <span className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-xs text-muted-foreground">
                   <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
                   Supabase &amp; PostgreSQL Connected
                 </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOauthProcessing(false);
+                    if (typeof window !== "undefined") {
+                      window.history.replaceState(null, "", window.location.pathname);
+                    }
+                  }}
+                  className="text-xs text-muted-foreground hover:text-foreground underline pt-1"
+                >
+                  Cancel and return to sign in
+                </button>
               </div>
             </div>
           ) : (
