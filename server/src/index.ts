@@ -6,7 +6,7 @@ import { seedDatabase } from "./utils/seedData.js";
 import { initQueueSystem } from "./services/queueService.js";
 import { startScheduler } from "./services/schedulerService.js";
 import { startEmbeddedPostgres, migrateDatabase } from "./config/postgres.js";
-import { prisma, checkPrismaConnection } from "./config/prismaClient.js";
+import { prisma, checkPrismaConnection, startPrismaKeepAlive } from "./config/prismaClient.js";
 
 async function bootstrap() {
   console.log("-----------------------------------------");
@@ -16,11 +16,16 @@ async function bootstrap() {
   // 1. PostgreSQL (embedded or external) + Prisma schema push
   try {
     await startEmbeddedPostgres();
-    await migrateDatabase();
-    // Warm up Prisma connection
+    // Warm up Prisma connection immediately
     await prisma.$connect();
     await checkPrismaConnection();
-    console.log("[Postgres] Prisma client connected & verified ✓");
+    startPrismaKeepAlive();
+    console.log("[Postgres] Prisma client connected & warm keep-alive active ✓");
+
+    // Background schema check if needed (non-blocking for instant server startup)
+    migrateDatabase().catch((err) => {
+      console.warn("[Postgres] Background schema sync notice:", err.message);
+    });
   } catch (err: any) {
     console.error("[Postgres] Notice: PostgreSQL startup:", err.message);
   }

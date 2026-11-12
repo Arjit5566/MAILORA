@@ -106,12 +106,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(parsed);
         setToken(storedToken);
         axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
-        // If we have a cached user and there's NO OAuth return, skip the /me check
-        // and mark loading done immediately for instant app load
+        // If we have a cached user and there's NO OAuth return, mark loading done immediately
+        // for instant 0ms app rendering
         const hasOAuthReturnEarly =
           window.location.hash.includes("access_token") ||
           window.location.search.includes("code=");
-        if (!hasOAuthReturnEarly && !isSupabaseConfigured) {
+        if (!hasOAuthReturnEarly) {
           setLoading(false);
           return;
         }
@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const res = await axios.get(`${AUTH_API_URL}/me`, {
             headers: { Authorization: `Bearer ${storedToken}` },
-            timeout: 4000,
+            timeout: 3000,
           });
           if (res.data?.user) {
             setUser(res.data.user);
@@ -141,12 +141,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Token invalid or expired
           clearAuth();
         }
-      } else if (!storedToken) {
-        // No token at all – nothing to validate
       }
 
-      // Check if arriving back from Supabase Google OAuth callback
-      if (isSupabaseConfigured) {
+      // Check Supabase Google OAuth callback ONLY when an OAuth return is detected in the URL
+      if (isSupabaseConfigured && hasOAuthReturn) {
         try {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user) {
@@ -161,7 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               const bridgeRes = await axios.post(`${AUTH_API_URL}/google`, {
                 email: googleEmail,
                 name: googleName,
-              });
+              }, { timeout: 8000 });
 
               if (bridgeRes.data?.token && bridgeRes.data?.user) {
                 saveAuth(bridgeRes.data.token, bridgeRes.data.user);
@@ -223,7 +221,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Login with Email & Password
   const login = async (email: string, password: string) => {
-    const res = await axios.post(`${AUTH_API_URL}/login`, { email, password });
+    const res = await axios.post(`${AUTH_API_URL}/login`, { email, password }, { timeout: 8000 });
     if (res.data?.token && res.data?.user) {
       saveAuth(res.data.token, res.data.user);
     } else {
@@ -233,7 +231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Register new account
   const register = async (name: string, email: string, password: string) => {
-    const res = await axios.post(`${AUTH_API_URL}/register`, { name, email, password });
+    const res = await axios.post(`${AUTH_API_URL}/register`, { name, email, password }, { timeout: 8000 });
     if (res.data?.token && res.data?.user) {
       saveAuth(res.data.token, res.data.user);
     } else {
