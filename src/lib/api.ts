@@ -143,6 +143,7 @@ export interface GeneratedEmail {
   subject: string;
   preheader: string;
   htmlBody: string;
+  textBody?: string;
   suggestedSubjectVariants: string[];
 }
 
