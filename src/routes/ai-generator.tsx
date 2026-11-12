@@ -116,6 +116,86 @@ const QUICK_PROMPTS = [
   },
 ];
 
+function generateClientFallbackEmail(params: {
+  emailType: string;
+  tone: string;
+  description: string;
+  recipientName: string;
+}): GeneratedEmail {
+  const greeting = params.recipientName ? `Hi ${params.recipientName},` : "Hello,";
+  const desc = params.description;
+  const cleanSummary = desc.length > 50 ? desc.slice(0, 47) + "…" : desc;
+
+  let subject = `${params.emailType}: ${cleanSummary}`;
+  if (params.emailType === "Marketing" || params.emailType === "Promotional") {
+    subject = `✨ Exclusive: ${cleanSummary}`;
+  } else if (params.emailType === "Welcome") {
+    subject = `👋 Welcome to Mailora — Let's get started`;
+  } else if (params.emailType === "Follow-up") {
+    subject = `Quick follow-up regarding our conversation`;
+  }
+
+  const variants = [
+    `Quick note: ${cleanSummary}`,
+    `${params.tone} update: ${cleanSummary}`,
+    `Important information regarding ${cleanSummary}`,
+  ];
+
+  const htmlBody = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width: 600px; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;">
+          <tr>
+            <td style="padding: 32px 32px 24px 32px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: #ffffff;">
+              <span style="display: inline-block; padding: 4px 12px; background: rgba(255, 255, 255, 0.2); border-radius: 9999px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">${params.emailType} • ${params.tone}</span>
+              <h1 style="margin: 0; font-size: 24px; font-weight: 700; line-height: 1.3; color: #ffffff;">${subject}</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 32px; font-size: 16px; line-height: 1.6; color: #334155;">
+              <p style="margin: 0 0 16px 0; font-weight: 600; color: #0f172a;">${greeting}</p>
+              <p style="margin: 0 0 20px 0;">${desc}</p>
+              <p style="margin: 0 0 24px 0;">We have tailored this update specifically with your needs in mind. Please feel free to review the details below or get in touch directly if you have any questions.</p>
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 28px 0;">
+                <tr>
+                  <td align="center" style="border-radius: 10px; background: #4f46e5;">
+                    <a href="https://mailora-lyart.vercel.app" target="_blank" style="display: inline-block; padding: 14px 32px; font-size: 15px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 10px;">Take Action &rarr;</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin: 0 0 8px 0; color: #64748b; font-size: 14px;">Best regards,</p>
+              <p style="margin: 0; font-weight: 600; color: #0f172a;">The Mailora Team</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; text-align: center;">
+              Sent securely via <a href="https://mailora-lyart.vercel.app" style="color: #6366f1; text-decoration: none; font-weight: 600;">Mailora Studio</a> • All rights reserved.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  return {
+    subject,
+    preheader: cleanSummary,
+    htmlBody,
+    textBody: `${greeting}\n\n${desc}\n\nBest regards,\nThe Mailora Team`,
+    suggestedSubjectVariants: variants,
+  };
+}
+
 function AiEmailGeneratorPage() {
   const { contacts } = useStore();
 
@@ -210,32 +290,48 @@ function AiEmailGeneratorPage() {
     setHasGenerated(false);
 
     try {
-      const res = await request<{ success: boolean; email: GeneratedEmail }>(
-        `${endpoints.aiEmail}/generate`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            emailType,
-            tone,
-            description: description.trim(),
-            recipientName: recipientName.trim(),
-            recipientEmail: recipientEmail.trim(),
-          }),
-        }
-      );
+      let emailResult: GeneratedEmail | null = null;
 
-      if (res.success && res.email) {
-        setSubject(res.email.subject);
-        setPreheader(res.email.preheader || "");
-        setHtmlContent(res.email.htmlBody);
-        setSubjectVariants(res.email.suggestedSubjectVariants || []);
+      try {
+        const res = await request<{ success: boolean; email: GeneratedEmail }>(
+          `${endpoints.aiEmail}/generate`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              emailType,
+              tone,
+              description: description.trim(),
+              recipientName: recipientName.trim(),
+              recipientEmail: recipientEmail.trim(),
+            }),
+          }
+        );
+        if (res.success && res.email) {
+          emailResult = res.email;
+        }
+      } catch (backendErr: any) {
+        console.warn("[AIGenerator] Backend request failed, generating client fallback:", backendErr);
+        // Smart client-side fallback if backend is asleep or suspended
+        emailResult = generateClientFallbackEmail({
+          emailType,
+          tone,
+          description: description.trim(),
+          recipientName: recipientName.trim(),
+        });
+      }
+
+      if (emailResult) {
+        setSubject(emailResult.subject);
+        setPreheader(emailResult.preheader || "");
+        setHtmlContent(emailResult.htmlBody);
+        setSubjectVariants(emailResult.suggestedSubjectVariants || []);
         setHasGenerated(true);
         setActiveTab("editor");
-        toast.success("Email generated by Gemini AI!", {
-          description: "Review, edit and customize before sending.",
+        toast.success("Email generated successfully!", {
+          description: "Review, edit and customize your message before sending.",
         });
       } else {
-        throw new Error("Invalid response from generator");
+        throw new Error("Could not generate email content");
       }
     } catch (err: any) {
       toast.error(err.message || "Failed to generate email. Please try again.");
