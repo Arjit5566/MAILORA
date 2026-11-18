@@ -85,7 +85,7 @@ function Brand({ collapsed }: { collapsed: boolean }) {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { backendConnected } = useStore();
-  const { user, logout, loading } = useAuth();
+  const { user, logout, loading, loginAsGuest } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -251,9 +251,21 @@ export function AppShell({ children }: { children: ReactNode }) {
               You must sign in to Mailora to access this feature. Create an account or sign in with your credentials to unlock the full platform.
             </p>
             <div className="pt-2 flex flex-col gap-2">
+              <Button
+                onClick={() => {
+                  loginAsGuest();
+                  toast.success("Welcome! Demo Access Activated", {
+                    description: "Enjoy full access to all Mailora features.",
+                  });
+                }}
+                className="w-full bg-gradient-brand shadow-glow text-xs font-semibold gap-2"
+              >
+                <Zap className="h-4 w-4" />
+                <span>Instant Demo Access (Unlock All Features)</span>
+              </Button>
               <Link to="/login">
-                <Button className="w-full bg-gradient-brand shadow-glow text-xs font-semibold">
-                  Sign In or Create Account
+                <Button variant="outline" className="w-full text-xs font-semibold">
+                  Sign In with Password / Google
                 </Button>
               </Link>
               <Link to="/">

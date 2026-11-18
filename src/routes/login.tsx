@@ -29,7 +29,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const search = useSearch({ strict: false }) as { token?: string; redirect?: string };
-  const { user, login, register, loginWithGoogle, forgotPassword, resetPassword, logout } = useAuth();
+  const { user, login, register, loginWithGoogle, forgotPassword, resetPassword, loginAsGuest, logout } = useAuth();
 
   const [mode, setMode] = useState<"signin" | "signup" | "forgot" | "reset">(
     search.token ? "reset" : "signin"
@@ -538,6 +538,32 @@ function LoginPage() {
               )}
             </button>
           </form>
+
+          {/* Quick Demo Instant Access Button */}
+          {(mode === "signin" || mode === "signup") && (
+            <div className="pt-2">
+              <div className="relative my-3 flex items-center justify-center">
+                <div className="w-full border-t border-border/60" />
+                <span className="bg-card px-2 text-[10px] uppercase tracking-wider text-muted-foreground font-mono">
+                  or explore directly
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  loginAsGuest();
+                  toast.success("Welcome! Demo Access Activated", {
+                    description: "Taking you to your dashboard.",
+                  });
+                  navigate({ to: search.redirect || "/" });
+                }}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-primary/40 bg-primary/10 text-xs font-semibold text-primary transition-all hover:bg-primary/20 active:scale-[0.99]"
+              >
+                <Zap className="h-4 w-4" />
+                <span>Instant Demo Access (No Password Needed)</span>
+              </button>
+            </div>
+          )}
 
           {/* Footer Navigation */}
           <div className="mt-6 text-center text-xs text-muted-foreground">

@@ -19,6 +19,7 @@ interface AuthContextType {
   loginWithGoogle: (preferredEmail?: string, preferredName?: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<string>;
   resetPassword: (token: string, password: string) => Promise<string>;
+  loginAsGuest: () => void;
   logout: () => void;
 }
 
@@ -376,6 +377,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res.data?.message || "Password reset successfully. You can now log in.";
   };
 
+  // 1-Click Instant Guest / Demo Mode
+  const loginAsGuest = useCallback(() => {
+    const guestUser: AuthUser = {
+      id: "usr_guest_" + Math.random().toString(36).slice(2, 8),
+      name: "Demo Explorer",
+      email: "demo@mailora.app",
+    };
+    saveAuth("guest_token_" + Date.now(), guestUser);
+  }, [saveAuth]);
+
   // Logout action
   const logout = () => {
     clearAuth();
@@ -393,6 +404,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginWithGoogle,
         forgotPassword,
         resetPassword,
+        loginAsGuest,
         logout,
       }}
     >

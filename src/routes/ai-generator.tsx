@@ -327,6 +327,12 @@ function AiEmailGeneratorPage() {
         setSubjectVariants(emailResult.suggestedSubjectVariants || []);
         setHasGenerated(true);
         setActiveTab("editor");
+        setTimeout(() => {
+          if (typeof window !== "undefined") {
+            const el = document.getElementById("ai-editor-preview");
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 150);
         toast.success("Email generated successfully!", {
           description: "Review, edit and customize your message before sending.",
         });
@@ -920,7 +926,7 @@ function AiEmailGeneratorPage() {
           </div>
 
           {/* Right Column: Editable Rich-Text Editor & Previews (7 cols) */}
-          <div className="lg:col-span-7 space-y-6">
+          <div id="ai-editor-preview" className="lg:col-span-7 space-y-6">
             {!hasGenerated && !isGenerating ? (
               <GlassCard className="p-12 text-center space-y-4 min-h-[500px] flex flex-col items-center justify-center">
                 <div className="relative">
