@@ -1,3 +1,11 @@
+import dns from "node:dns";
+
+// CRITICAL: Force IPv4 first across all DNS lookups in Node 18/20/22+
+// Prevents silent TCP blackhole drops when connecting to IPv6-enabled hosts (Supabase, Gmail SMTP, etc.) on IPv4-only cloud hosts like Render
+try {
+  dns.setDefaultResultOrder("ipv4first");
+} catch {}
+
 import { app } from "./app.js";
 import { config } from "./config/env.js";
 import { connectDB } from "./config/db.js";

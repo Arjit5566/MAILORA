@@ -406,29 +406,7 @@ export async function sendEmail({
     try {
       const cleanPass = String(smtp.pass || "").replace(/\s+/g, "");
       const isGmail = (smtp.host || "").toLowerCase().includes("gmail");
-
-      const transportOpts: any = isGmail
-        ? {
-            service: "gmail",
-            auth: {
-              user: smtp.user,
-              pass: cleanPass,
-            },
-          }
-        : {
-            host: smtp.host,
-            port: smtp.port || 587,
-            secure: smtp.secure || smtp.port === 465,
-            auth: {
-              user: smtp.user,
-              pass: cleanPass,
-            },
-            tls: {
-              rejectUnauthorized: false,
-            },
-          };
-
-      const transporter = nodemailer.createTransport(transportOpts);
+      const host = isGmail ? "smtp.gmail.com" : (smtp.host || "smtp.gmail.com");
 
       // Generate clean plain text fallback to maximize inbox deliverability
       const plainText = (html || "")
@@ -456,12 +434,63 @@ export async function sendEmail({
       if (ccHeader) mailOptions.cc = ccHeader;
       if (bccHeader) mailOptions.bcc = bccHeader;
 
-      const info = await transporter.sendMail(mailOptions);
+      // Primary attempt: Port 587 with STARTTLS (highest deliverability on cloud containers)
+      let info: any = null;
+      let lastErr: any = null;
 
-      return {
-        success: true,
-        messageId: info.messageId,
-      };
+      try {
+        const transporter587 = nodemailer.createTransport({
+          host,
+          port: 587,
+          secure: false,
+          auth: {
+            user: smtp.user,
+            pass: cleanPass,
+          },
+          connectionTimeout: 12000,
+          greetingTimeout: 10000,
+          socketTimeout: 15000,
+          tls: {
+            rejectUnauthorized: false,
+          },
+        });
+        info = await transporter587.sendMail(mailOptions);
+      } catch (err587: any) {
+        lastErr = err587;
+        console.warn("[EmailService] SMTP port 587 attempt failed, trying port 465 SSL:", err587.message);
+
+        // Secondary attempt: Port 465 SSL
+        try {
+          const transporter465 = nodemailer.createTransport({
+            host,
+            port: 465,
+            secure: true,
+            auth: {
+              user: smtp.user,
+              pass: cleanPass,
+            },
+            connectionTimeout: 12000,
+            greetingTimeout: 10000,
+            socketTimeout: 15000,
+            tls: {
+              rejectUnauthorized: false,
+            },
+          });
+          info = await transporter465.sendMail(mailOptions);
+        } catch (err465: any) {
+          lastErr = err465;
+          console.error("[EmailService] Both port 587 and 465 failed:", err465.message);
+        }
+      }
+
+      if (info?.messageId) {
+        return {
+          success: true,
+          messageId: info.messageId,
+        };
+      }
+
+      throw lastErr || new Error("SMTP connection failed on all ports");
     } catch (err: any) {
       console.error("[EmailService] SMTP delivery error:", err.message);
       return { success: false, error: err.message };
