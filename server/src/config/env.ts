@@ -14,6 +14,7 @@ export const config = {
   appUrl: process.env.APP_URL || "http://localhost:5173",
   apiBaseUrl: process.env.API_BASE_URL || `http://localhost:${process.env.PORT || "4000"}`,
   brevoApiKey: process.env.BREVO_API_KEY || "",
+  resendApiKey: process.env.RESEND_API_KEY || "",
   smtp: {
     host: process.env.SMTP_HOST || "",
     port: parseInt(process.env.SMTP_PORT || "587", 10),
